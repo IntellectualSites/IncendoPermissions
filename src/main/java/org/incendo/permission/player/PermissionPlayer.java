@@ -33,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 import org.incendo.permission.Group;
 import org.incendo.permission.Permission;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -45,6 +46,7 @@ public abstract class PermissionPlayer implements CommandCaller<PermissionPlayer
     private final Collection<Permission> permissions = new HashSet<>(); // player specific permissions
     private final Collection<Permission> effectivePermissions = new HashSet<>();
     private final Collection<Consumer<PermissionPlayer>> updateSubscribers = Lists.newArrayList();
+    private final Map<String, String> properties = new HashMap<>();
 
     public boolean hasWorldDependent, hasGameModeDependent;
 
@@ -66,6 +68,43 @@ public abstract class PermissionPlayer implements CommandCaller<PermissionPlayer
 
     @NotNull public final Collection<Permission> getEffectivePermissions() {
         return Collections.unmodifiableCollection(effectivePermissions);
+    }
+
+    public boolean hasProperty(@NotNull final String key) {
+        Preconditions.checkNotNull(key, "key");
+        if (this.properties.containsKey(key)) {
+            return true;
+        }
+        for (final Group group : this.groups) {
+            if (group.hasProperty(key)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Nullable public String getProperty(@NotNull final String key) {
+        Preconditions.checkNotNull(key, "key");
+        if (this.properties.containsKey(key)) {
+            return this.properties.get(key);
+        }
+        for (final Group group : this.groups) {
+            if (group.hasProperty(key)) {
+                return group.getProperty(key);
+            }
+        }
+        return null;
+    }
+
+    public void setProperty(@NotNull final String key, @NotNull final String value) {
+        Preconditions.checkNotNull(key, "key");
+        Preconditions.checkNotNull(value, "value");
+        this.properties.put(key, value);
+    }
+
+    public void removeProperty(@NotNull final String key) {
+        Preconditions.checkNotNull(key, "key");
+        this.properties.remove(key);
     }
 
     public void registerUpdateSubscriber(@NotNull final Consumer<PermissionPlayer> subscriber) {

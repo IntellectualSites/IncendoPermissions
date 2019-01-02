@@ -31,6 +31,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -47,11 +48,51 @@ public final class Group {
 
     private final Collection<Permission> permissions = new ArrayList(); // initial permissions
     private final Collection<Permission> effectivePermissions = new HashSet<>();
+    private final Map<String, String> properties = new HashMap<>();
 
     private boolean modified = true;
 
     public boolean hasParent() {
         return this.parent != null;
+    }
+
+    public boolean hasProperty(@NotNull final String key) {
+        Preconditions.checkNotNull(key, "key");
+        if (this.properties.containsKey(key)) {
+            return true;
+        }
+        Group group = this;
+        while ((group = group.getParent()) != null) {
+            if (group.properties.containsKey(key)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Nullable public String getProperty(@NotNull final String key) {
+        Preconditions.checkNotNull(key, "key");
+        if (this.properties.containsKey(key)) {
+            return this.properties.get(key);
+        }
+        Group group = this;
+        while ((group = group.getParent()) != null) {
+            if (group.properties.containsKey(key)) {
+                return group.properties.get(key);
+            }
+        }
+        return null;
+    }
+
+    public void setProperty(@NotNull final String key, @NotNull final String value) {
+        Preconditions.checkNotNull(key, "key");
+        Preconditions.checkNotNull(value, "value");
+        this.properties.put(key, value);
+    }
+
+    public void removeProperty(@NotNull final String key) {
+        Preconditions.checkNotNull(key, "key");
+        this.properties.remove(key);
     }
 
     public void registerUpdateSubscriber(@NotNull final Consumer<Group> subscriber) {

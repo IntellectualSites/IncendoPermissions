@@ -32,7 +32,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.incendo.permission.player.PermissionPlayer;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Contract;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -50,20 +50,20 @@ final class BukkitPlayer extends PermissionPlayer {
         return player;
     }
 
-    @Override public void message(@NotNull final String s) {
+    @Override public void message(final String s) {
         this.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&' , s));
     }
 
-    @Override public PermissionPlayer getSuperCaller() {
+    @Contract(value = " -> this", pure = true) @Override public PermissionPlayer getSuperCaller() {
         return this;
     }
 
     @Override public boolean hasAttachment(final String s) {
-        return false;
+        return getPlayer().hasPermission(s);
     }
 
-    @Override public void sendRequiredArgumentsList(CommandManager commandManager, Command command,
-        Collection<Parserable> collection, String s) {
+    @Override public void sendRequiredArgumentsList(final CommandManager commandManager, final Command command,
+        final Collection<Parserable> collection, final String s) {
         // TODO: Implement this
     }
 

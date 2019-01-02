@@ -28,24 +28,30 @@ import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.incendo.permission.Permissions;
 
+/**
+ * The main class for the Bukkit implementation of the plugin
+ */
 @SuppressWarnings("unused")
 public final class PermissionPlugin extends JavaPlugin {
 
-    @Getter private final Permissions permissions = new Permissions();
     @Getter private final BukkitPlayerRegistry playerRegistry = new BukkitPlayerRegistry();
+    @Getter private Permissions permissions;
 
     @Override public void onEnable() {
+        this.permissions = new Permissions(this.getDataFolder());
         //
         // Initialize command handlers
         //
-        getCommand("permissions").setExecutor(new BukkitCommandExecutor(this.permissions.getMainCommand()));
-        getCommand("permissions").setTabCompleter(new BukkitTabCompleter(this.permissions.getMainCommand()));
+        this.getCommand("permissions").setExecutor(new BukkitCommandExecutor(this.permissions.getMainCommand(), this.playerRegistry));
+        this.getCommand("permissions").setTabCompleter(new BukkitTabCompleter(this.permissions.getMainCommand()));
         //
         // Register listeners
         //
-        getServer().getPluginManager().registerEvents(playerRegistry, this);
+        this.getServer().getPluginManager().registerEvents(playerRegistry, this);
+        // TODO: Load permissions
     }
 
     @Override public void onDisable() {
+        // TODO: Save permissions
     }
 }

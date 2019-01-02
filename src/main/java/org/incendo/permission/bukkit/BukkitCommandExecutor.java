@@ -98,7 +98,6 @@ final class BukkitCommandExecutor implements CommandExecutor {
             default: break;
         }
 
-
         // We handle usage messages ourselves
         return true;
     }

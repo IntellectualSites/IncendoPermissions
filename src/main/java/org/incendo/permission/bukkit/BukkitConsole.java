@@ -31,10 +31,14 @@ import com.intellectualsites.commands.parser.Parserable;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 
+/**
+ * Console caller, using {@link ConsoleCommandSender}
+ */
 final class BukkitConsole implements CommandCaller<BukkitConsole> {
 
     private final ConsoleCommandSender consoleCommandSender = Bukkit.getConsoleSender();
@@ -43,11 +47,11 @@ final class BukkitConsole implements CommandCaller<BukkitConsole> {
         this.consoleCommandSender.sendMessage(ChatColor.stripColor(s));
     }
 
-    @Override public BukkitConsole getSuperCaller() {
+    @Contract(value = " -> this", pure = true) @Override public BukkitConsole getSuperCaller() {
         return this;
     }
 
-    @Override public boolean hasAttachment(String s) {
+    @Contract(pure = true) @Override public boolean hasAttachment(String s) {
         return true;
     }
 

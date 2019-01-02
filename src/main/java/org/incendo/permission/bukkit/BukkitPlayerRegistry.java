@@ -38,21 +38,29 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Player registry responsible for handling conversion
+ * between {@link Player Bukkit players} and
+ * {@link org.incendo.permission.player.PermissionPlayer Permission players}
+ */
 final class BukkitPlayerRegistry implements Listener  {
 
     private final Map<UUID, BukkitPlayer> playerMap = new HashMap<>();
     @Getter  private final BukkitConsole console = new BukkitConsole();
 
     private void addPlayer(@NotNull final UUID uuid) {
+        Preconditions.checkNotNull(uuid, "uuid");
         final BukkitPlayer player = new BukkitPlayer(uuid);
         this.playerMap.put(uuid, player);
     }
 
     private void removePlayer(@NotNull final UUID uuid) {
+        Preconditions.checkNotNull(uuid, "uuid");
         this.playerMap.remove(uuid);
     }
 
     BukkitPlayer getPlayer(@NotNull final Player bukkitPlayer) {
+        Preconditions.checkNotNull(bukkitPlayer, "player");
         final UUID uuid = bukkitPlayer.getUniqueId();
         if (!this.playerMap.containsKey(uuid)) {
             throw new IllegalStateException(String.format("No BukkitPlayer with UUID \"%s\" is loaded.", uuid.toString()));
@@ -61,7 +69,7 @@ final class BukkitPlayerRegistry implements Listener  {
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-    public void onPlayerLogin(final AsyncPlayerPreLoginEvent event) {
+    public void onPlayerLogin(@NotNull final AsyncPlayerPreLoginEvent event) {
         Preconditions.checkNotNull(event.getUniqueId());
         if (event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
             return;
@@ -70,7 +78,7 @@ final class BukkitPlayerRegistry implements Listener  {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerQuit(final PlayerQuitEvent event) {
+    public void onPlayerQuit(@NotNull final PlayerQuitEvent event) {
         this.removePlayer(event.getPlayer().getUniqueId());
     }
 

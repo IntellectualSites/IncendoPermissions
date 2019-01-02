@@ -36,7 +36,7 @@ import java.util.List;
  * Bukkit tab completer
  */
 @RequiredArgsConstructor
-class BukkitTabCompleter implements TabCompleter {
+final class BukkitTabCompleter implements TabCompleter {
 
     private final PermissionCommand permissionCommand;
 

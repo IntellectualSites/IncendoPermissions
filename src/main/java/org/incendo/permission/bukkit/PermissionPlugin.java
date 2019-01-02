@@ -25,6 +25,8 @@
 package org.incendo.permission.bukkit;
 
 import lombok.Getter;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.incendo.permission.Permissions;
 
@@ -34,24 +36,29 @@ import org.incendo.permission.Permissions;
 @SuppressWarnings("unused")
 public final class PermissionPlugin extends JavaPlugin {
 
-    @Getter private final BukkitPlayerRegistry playerRegistry = new BukkitPlayerRegistry();
+    @Getter private BukkitPlayerRegistry playerRegistry;
     @Getter private Permissions permissions;
 
     @Override public void onEnable() {
         this.permissions = new Permissions(this.getDataFolder());
+        this.playerRegistry = new BukkitPlayerRegistry(this);
         //
         // Initialize command handlers
         //
-        this.getCommand("permissions").setExecutor(new BukkitCommandExecutor(this.permissions.getMainCommand(), this.playerRegistry));
+        this.getCommand("permissions").setExecutor(new BukkitCommandExecutor(this.permissions.getMainCommand(),
+            this.playerRegistry));
         this.getCommand("permissions").setTabCompleter(new BukkitTabCompleter(this.permissions.getMainCommand()));
         //
         // Register listeners
         //
         this.getServer().getPluginManager().registerEvents(playerRegistry, this);
         // TODO: Load permissions
+
+        // Load permissions for players that are online right now, in case of reload (ew)
+        Bukkit.getOnlinePlayers().stream().map(Player::getUniqueId).forEach(playerRegistry::loadPlayer);
     }
 
     @Override public void onDisable() {
-        // TODO: Save permissions
+        // TODO: Save permissions and unload all players -> we are reloadable!
     }
 }

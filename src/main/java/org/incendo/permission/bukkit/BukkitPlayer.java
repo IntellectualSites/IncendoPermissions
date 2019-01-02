@@ -27,25 +27,27 @@ package org.incendo.permission.bukkit;
 import com.intellectualsites.commands.Command;
 import com.intellectualsites.commands.CommandManager;
 import com.intellectualsites.commands.parser.Parserable;
-import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.incendo.permission.player.PermissionPlayer;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.UUID;
 
-@RequiredArgsConstructor
 final class BukkitPlayer extends PermissionPlayer {
 
-    private final UUID uuid;
     private Player player; // Lazy loaded
+
+    BukkitPlayer(@NotNull final UUID uuid) {
+        super(uuid);
+    }
 
     private Player getPlayer() {
         if (player == null) {
-            player = Bukkit.getPlayer(uuid);
+            player = Bukkit.getPlayer(this.getUuid());
         }
         return player;
     }

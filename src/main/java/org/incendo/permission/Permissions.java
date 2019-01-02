@@ -24,16 +24,27 @@
 
 package org.incendo.permission;
 
+import com.intellectualsites.configurable.ConfigurationFactory;
 import lombok.Getter;
 import org.incendo.permission.commands.PermissionCommand;
+import org.incendo.permission.config.Messages;
+import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+
+/**
+ * Permissions main file. Get an instance of this via your implementations plugin file
+ */
 public final class Permissions {
 
-    @Getter
-    private final PermissionCommand mainCommand;
+    @Getter private final PermissionCommand mainCommand;
+    @Getter private final File folder;
 
-    public Permissions() {
+    public Permissions(@NotNull final File folder) {
         this.mainCommand = new PermissionCommand(this);
+        this.folder = folder;
+        // Load configurations
+        ConfigurationFactory.load(Messages.class, new File(getFolder(), "config")).get();
     }
 
 }

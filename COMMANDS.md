@@ -16,4 +16,4 @@ Arguments: **\<arg\>** is required, **\[arg\]** is optional.
 - /perms player \<player-name\> set \<property-name\> \<property-value\>
 
 #### General Commands
-- /perms test player/group <name> <permission>
+- /perms test player/group \<name\> \<permission\>

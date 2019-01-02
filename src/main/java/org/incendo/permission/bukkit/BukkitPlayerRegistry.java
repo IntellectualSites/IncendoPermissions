@@ -35,33 +35,57 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
+import org.incendo.permission.Permission;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Player registry responsible for handling conversion
  * between {@link Player Bukkit players} and
  * {@link org.incendo.permission.player.PermissionPlayer Permission players}
  */
-@RequiredArgsConstructor
-final class BukkitPlayerRegistry implements Listener  {
+@RequiredArgsConstructor final class BukkitPlayerRegistry implements Listener {
 
-    private final Map<UUID, BukkitPlayer> playerMap = new HashMap<>();
+    private final Map<UUID, BukkitPlayer> playerMap = new ConcurrentHashMap<>();
     @Getter private final BukkitConsole console = new BukkitConsole();
 
     private final PermissionPlugin plugin;
 
-    private void addPlayer(@NotNull final UUID uuid) {
+    void addPlayer(@NotNull final UUID uuid) {
         Preconditions.checkNotNull(uuid, "uuid");
         final BukkitPlayer player = new BukkitPlayer(uuid);
+        player.registerUpdateSubscriber(p -> attachPermissions((BukkitPlayer) p));
         this.playerMap.put(uuid, player);
     }
 
-    private void removePlayer(@NotNull final UUID uuid) {
+    private boolean isLoaded(@NotNull final UUID uuid) {
         Preconditions.checkNotNull(uuid, "uuid");
-        this.playerMap.remove(uuid);
-        final Player player = Bukkit.getPlayer(uuid);
+        return this.playerMap.containsKey(uuid);
+    }
+
+    private void removeInternally(@NotNull final Player player) {
+        this.removePlayer(player.getUniqueId());
+    }
+
+    private void attachPermissions(@NotNull final BukkitPlayer player) {
+        Preconditions.checkNotNull(player, "player");
+        // first make sure to remove all pre-existing attachments
+        this.removeInternally(player.getPlayer());
+        // then we add the new ones
+        for (final Permission permission : player.getEffectivePermissions()) {
+            // TODO: Add support for timed permissions
+            player.getPlayer()
+                .addAttachment(plugin, permission.getRawName(), permission.getValue());
+        }
+    }
+
+    private void removeAttachments(@Nullable final Player player) {
         if (player != null && player.isOnline()) {
             final List<PermissionAttachment> permissionsToRemove = new ArrayList<>();
             for (final PermissionAttachmentInfo attachment : player.getEffectivePermissions()) {
@@ -73,11 +97,26 @@ final class BukkitPlayerRegistry implements Listener  {
         }
     }
 
-    BukkitPlayer getPlayer(@NotNull final Player bukkitPlayer) {
+    private void removePlayer(@NotNull final UUID uuid) {
+        Preconditions.checkNotNull(uuid, "uuid");
+        this.playerMap.remove(uuid);
+        final Player player = Bukkit.getPlayer(uuid);
+        removeAttachments(player);
+    }
+
+    /**
+     * Get a {@link BukkitPlayer} from a {@link Player}
+     *
+     * @param bukkitPlayer Player
+     * @return Bukkit player
+     * @throws IllegalStateException if the UUID of the player isn't loaded in the registry
+     */
+    @NotNull BukkitPlayer getPlayer(@NotNull final Player bukkitPlayer) {
         Preconditions.checkNotNull(bukkitPlayer, "player");
         final UUID uuid = bukkitPlayer.getUniqueId();
         if (!this.playerMap.containsKey(uuid)) {
-            throw new IllegalStateException(String.format("No BukkitPlayer with UUID \"%s\" is loaded.", uuid.toString()));
+            throw new IllegalStateException(
+                String.format("No BukkitPlayer with UUID \"%s\" is loaded.", uuid.toString()));
         }
         return this.playerMap.get(uuid);
     }
@@ -91,21 +130,33 @@ final class BukkitPlayerRegistry implements Listener  {
         if (event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
             return;
         }
-        this.loadPlayer(event.getUniqueId());
+        this.addPlayer(event.getUniqueId());
     }
 
     //
     // Filters listeners
     //
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerGameModeChange(@NotNull final PlayerGameModeChangeEvent event) {
-
+    /**
+     * Re-calculate permissions if the player has any game mode dependent permissions
+     */
+    @EventHandler(priority = EventPriority.LOWEST) public void onPlayerGameModeChange(
+        @NotNull final PlayerGameModeChangeEvent event) {
+        final BukkitPlayer player = getPlayer(event.getPlayer());
+        if (player.hasGameModeDependent()) {
+            this.attachPermissions(player);
+        }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerWorldChange(@NotNull final PlayerChangedWorldEvent event) {
-
+    /**
+     * Re-calculate permissions if the player has any world dependent permissions
+     */
+    @EventHandler(priority = EventPriority.LOWEST) public void onPlayerWorldChange(
+        @NotNull final PlayerChangedWorldEvent event) {
+        final BukkitPlayer player = getPlayer(event.getPlayer());
+        if (player.hasWorldDependent()) {
+            this.attachPermissions(player);
+        }
     }
 
     //
@@ -115,31 +166,28 @@ final class BukkitPlayerRegistry implements Listener  {
     /**
      * Add the permissions to the player
      */
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerLogin(@NotNull final PlayerLoginEvent event) {
-
-    }
-
-    void loadPlayer(@NotNull final UUID uuid) {
-        Preconditions.checkNotNull(uuid, "uuid");
-        this.addPlayer(uuid);
+    @EventHandler(priority = EventPriority.HIGHEST) public void onPlayerLogin(
+        @NotNull final PlayerLoginEvent event) {
+        while (event.getPlayer().isOnline() && !this
+            .isLoaded(event.getPlayer().getUniqueId())) { // block until it is loaded
+            this.attachPermissions(getPlayer(event.getPlayer()));
+        }
     }
 
     /**
      * Remove the player from the registry
      */
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerQuit(@NotNull final PlayerQuitEvent event) {
+    @EventHandler(priority = EventPriority.HIGHEST) public void onPlayerQuit(
+        @NotNull final PlayerQuitEvent event) {
         this.removeInternally(event.getPlayer());
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerKick(@NotNull final PlayerKickEvent event) {
+    /**
+     * Remove the player from the registry
+     */
+    @EventHandler(priority = EventPriority.HIGHEST) public void onPlayerKick(
+        @NotNull final PlayerKickEvent event) {
         this.removeInternally(event.getPlayer());
-    }
-
-    private void removeInternally(@NotNull final Player player) {
-        this.removePlayer(player.getUniqueId());
     }
 
 }

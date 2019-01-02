@@ -45,7 +45,7 @@ final class BukkitPlayer extends PermissionPlayer {
         super(uuid);
     }
 
-    private Player getPlayer() {
+    Player getPlayer() {
         if (player == null) {
             player = Bukkit.getPlayer(this.getUuid());
         }

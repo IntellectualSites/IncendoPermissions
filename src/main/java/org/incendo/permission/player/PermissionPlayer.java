@@ -46,12 +46,22 @@ public abstract class PermissionPlayer implements CommandCaller<PermissionPlayer
     private final Collection<Permission> effectivePermissions = new HashSet<>();
     private final Collection<Consumer<PermissionPlayer>> updateSubscribers = Lists.newArrayList();
 
+    public boolean hasWorldDependent, hasGameModeDependent;
+
     protected final void setup() {
         // Load groups
         for (final Group group : groups) {
             group.registerUpdateSubscriber(g -> this.updateEffectivePermissions());
         }
         this.updateEffectivePermissions();
+    }
+
+    public final boolean hasWorldDependent() {
+        return false; // TODO: Implement this
+    }
+
+    public boolean hasGameModeDependent() {
+        return false; // TODO: Implement this
     }
 
     @NotNull public final Collection<Permission> getEffectivePermissions() {

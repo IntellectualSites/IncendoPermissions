@@ -1,0 +1,13 @@
+name: IncendoPermissions
+authors: [Citymonstret]
+main: org.incendo.permission.bukkit.PermissionPlugin
+version: 1.0
+commands:
+  permissions:
+    permission: 'incendoperms.use'
+    usage: '/permissions'
+    aliases: [iperms, perms, permissions, pex, lp]
+permissions:
+  incendoperms.use:
+    default: op
+    description: 'Permissions main command permission'

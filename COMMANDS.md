@@ -1,7 +1,7 @@
 ## List of commands
 Arguments: **\<arg\>** is required, **\[arg\]** is optional.
 
-####Group Commands
+#### Group Commands
 - /perms group create <group-name> [parent]
 - /perms group <group-name> add <permission-node> [...filters]
 - /perms group <group-name> remove <permission-node> [...filters]
@@ -9,11 +9,11 @@ Arguments: **\<arg\>** is required, **\[arg\]** is optional.
 - /perms group <group-name> list
 - /perms group <group-name> set <property-name> <property-value>
 
-####Player Commands
+#### Player Commands
 - /perms player <player-name> add <group/perm> <name>
 - /perms player <player-name> remove <group/perm> <name>
 - /perms player <player-name> list
 - /perms player <player-name> set <property-name> <property-value>
 
-####General Commands
+#### General Commands
 - /perms test player/group <name> <permission>

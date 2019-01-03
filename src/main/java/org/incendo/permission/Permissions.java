@@ -25,6 +25,7 @@
 package org.incendo.permission;
 
 import com.google.common.base.Preconditions;
+import com.intellectualsites.commands.CommandResult;
 import com.intellectualsites.configurable.ConfigurationFactory;
 import lombok.Getter;
 import org.incendo.permission.commands.PermissionCommand;
@@ -36,6 +37,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Permissions main file. Get an instance of this via your implementations plugin file
@@ -45,11 +47,14 @@ public final class Permissions {
     @Getter private final PermissionCommand mainCommand;
     @Getter private final File folder;
     @Getter private final PermissionDatabase database;
+    @Getter private final Consumer<CommandResult> resultConsumer;
     private final Collection<Group> groups = new HashSet<>();
 
-    public Permissions(@NotNull final File folder) {
+    public Permissions(@NotNull final File folder, @NotNull final Consumer<CommandResult> resultConsumer) {
         Preconditions.checkNotNull(folder, "folder");
+        Preconditions.checkNotNull(resultConsumer, "result consumer");
         this.folder = folder;
+        this.resultConsumer = resultConsumer;
 
         final File configFolder = new File(this.folder, "config");
         if (!configFolder.exists()) {

@@ -71,7 +71,7 @@ import java.util.concurrent.ConcurrentHashMap;
     void addPlayer(@NotNull final UUID uuid) {
         Preconditions.checkNotNull(uuid, "uuid");
         final BukkitPlayer player = new BukkitPlayer(plugin.getPermissions(), uuid);
-        player.registerUpdateSubscriber(p -> attachPermissions((BukkitPlayer) p));
+        // player.registerUpdateSubscriber(p -> attachPermissions((BukkitPlayer) p));
         this.playerMap.put(uuid, player);
     }
 
@@ -84,23 +84,12 @@ import java.util.concurrent.ConcurrentHashMap;
         this.removePlayer(player.getUniqueId());
     }
 
-    private void attachPermissions(@NotNull final BukkitPlayer player) {
-        Preconditions.checkNotNull(player, "player");
-        // first make sure to remove all pre-existing attachments
-        this.removeInternally(player.getPlayer());
-        // then we add the new ones
-        /*for (final Permission permission : player.getEffectivePermissions()) {
-            // TODO: Add support for timed permissions
-            player.getPlayer()
-                .addAttachment(plugin, permission.getRawName(), permission.getValue());
-        }*/
-    }
-
     private void removeAttachments(@Nullable final Player player) {
         if (player != null && player.isOnline()) {
             final List<PermissionAttachment> permissionsToRemove = new ArrayList<>();
             for (final PermissionAttachmentInfo attachment : player.getEffectivePermissions()) {
-                if (attachment.getAttachment().getPlugin().equals(plugin)) {
+                if (attachment.getAttachment() != null && attachment.getAttachment().getPlugin() != null &&
+                    attachment.getAttachment().getPlugin().equals(plugin)) {
                     permissionsToRemove.add(attachment.getAttachment());
                 }
             }
@@ -155,7 +144,8 @@ import java.util.concurrent.ConcurrentHashMap;
         @NotNull final PlayerGameModeChangeEvent event) {
         final BukkitPlayer player = getPlayer(event.getPlayer());
         if (player.hasGameModeDependent()) {
-            this.attachPermissions(player);
+            // this.attachPermissions(player);
+            player.updateEffectivePermissions();
         }
     }
 
@@ -166,7 +156,7 @@ import java.util.concurrent.ConcurrentHashMap;
         @NotNull final PlayerChangedWorldEvent event) {
         final BukkitPlayer player = getPlayer(event.getPlayer());
         if (player.hasWorldDependent()) {
-            this.attachPermissions(player);
+            player.updateEffectivePermissions();
         }
     }
 
@@ -181,22 +171,23 @@ import java.util.concurrent.ConcurrentHashMap;
         @NotNull final PlayerLoginEvent event) {
         while (event.getPlayer().isOnline() && !this
             .isLoaded(event.getPlayer().getUniqueId())) { // block until it is loaded
-            final BukkitPlayer bukkitPlayer = getPlayer(event.getPlayer());
-            final CraftHumanEntity craftHumanEntity = (CraftHumanEntity) event.getPlayer();
-            try {
-                FIELD_PERM.setAccessible(true);
-                final PermissibleBase oldBase = (PermissibleBase) FIELD_PERM.get(craftHumanEntity);
-                final PermissibleBase customBase = new CustomPermissibleBase(this.plugin, bukkitPlayer,
-                    event.getPlayer(), oldBase);
-                FIELD_PERM.set(craftHumanEntity, customBase);
-                plugin.getLogger().info(String.format("Injected custom PermissibleBase into player %s",
-                    event.getPlayer().getName()));
-            } catch (final Throwable e) {
-                plugin.getLogger().severe(String.format("Failed to replace PermissibleBase: %s",
-                    e.getMessage()));
-            }
-            this.attachPermissions(bukkitPlayer);
         }
+        final BukkitPlayer bukkitPlayer = getPlayer(event.getPlayer());
+        final CraftHumanEntity craftHumanEntity = (CraftHumanEntity) event.getPlayer();
+        try {
+            FIELD_PERM.setAccessible(true);
+            final PermissibleBase oldBase = (PermissibleBase) FIELD_PERM.get(craftHumanEntity);
+            final PermissibleBase customBase = new CustomPermissibleBase(this.plugin, bukkitPlayer,
+                event.getPlayer(), oldBase);
+            FIELD_PERM.set(craftHumanEntity, customBase);
+            plugin.getLogger().info(String.format("Injected custom PermissibleBase into player %s",
+                event.getPlayer().getName()));
+        } catch (final Throwable e) {
+            plugin.getLogger().severe(String.format("Failed to replace PermissibleBase: %s",
+                e.getMessage()));
+            e.printStackTrace();
+        }
+        bukkitPlayer.updateEffectivePermissions();
     }
 
     /**

@@ -182,7 +182,7 @@ public abstract class PermissionPlayer implements CommandCaller<PermissionPlayer
      * Performs a greedy search for effectively positive permissions across the players
      * personal permissions, and their group permissions
      */
-    private final void updateEffectivePermissions() {
+    public final void updateEffectivePermissions() {
         final Map<String, Permission> effectivePermissions = Maps.newHashMap();
         for (final Group group : groups) {
             for (final Permission permission : group.getEffectivePermissions()) {

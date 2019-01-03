@@ -102,7 +102,9 @@ final class CustomPermissibleBase extends PermissibleBase {
     }
 
     @Override public void recalculatePermissions() {
-        oldBase.recalculatePermissions();
+        try {
+            oldBase.recalculatePermissions();
+        } catch (final Throwable ignored) {}
     }
 
     @Override public synchronized void clearPermissions() {

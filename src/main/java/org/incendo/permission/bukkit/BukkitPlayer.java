@@ -56,7 +56,7 @@ final class BukkitPlayer extends PermissionPlayer {
 
     @Override public void message(final String s) {
         this.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&' ,
-            String.format("%s %s", Messages.PREFIX, s)));
+           Messages.PREFIX + s));
     }
 
     @Contract(value = " -> this", pure = true) @Override public PermissionPlayer getSuperCaller() {

@@ -38,6 +38,7 @@ public final class PermissionPlugin extends JavaPlugin {
 
     @Getter private BukkitPlayerRegistry playerRegistry;
     @Getter private Permissions permissions;
+    @Getter private BukkitCommandExecutor bukkitCommandExecutor;
 
     @Override public void onEnable() {
         if (!this.getDataFolder().exists()) {
@@ -47,13 +48,16 @@ public final class PermissionPlugin extends JavaPlugin {
             }
         }
 
-        this.permissions = new Permissions(this.getDataFolder());
+        this.permissions = new Permissions(this.getDataFolder(), result -> this.getBukkitCommandExecutor().handle(result));
         this.playerRegistry = new BukkitPlayerRegistry(this);
+
+        bukkitCommandExecutor = new BukkitCommandExecutor(this.permissions.getMainCommand(),
+            this.playerRegistry);
+
         //
         // Initialize command handlers
         //
-        this.getCommand("permissions").setExecutor(new BukkitCommandExecutor(this.permissions.getMainCommand(),
-            this.playerRegistry));
+        this.getCommand("permissions").setExecutor(bukkitCommandExecutor);
         this.getCommand("permissions").setTabCompleter(new BukkitTabCompleter(this.permissions.getMainCommand()));
         //
         // Register listeners

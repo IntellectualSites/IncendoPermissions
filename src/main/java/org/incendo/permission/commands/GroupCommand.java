@@ -35,13 +35,21 @@ import org.jetbrains.annotations.NotNull;
 @CommandDeclaration(command = "group", aliases = "g", usage = "/prms group", permission = "incendoperms.use.group")
 public class GroupCommand extends Command {
 
-    public GroupCommand(@NotNull final Permissions permissions) {
+    private final Permissions permissions;
+
+    GroupCommand(@NotNull final Permissions permissions) {
+        this.permissions = permissions;
         this.createCommand(new Create(permissions));
         this.createCommand(new Add(permissions));
     }
 
     @Override public boolean onCommand(@NotNull final CommandInstance instance) {
-        // TODO: Send help menu
+        if (instance.getArguments().length > 0) {
+            this.permissions.getResultConsumer().accept(this.handle(instance.getCaller(), instance.getArguments()));
+        } else {
+            // TODO: Send help menu
+            instance.getCaller().message("this is supposed to be a help menu");
+        }
         return true;
     }
 }

@@ -30,7 +30,7 @@ import com.intellectualsites.configurable.annotations.Configuration;
 @Configuration(name = "messages", implementation = ConfigurationImplementation.YAML)
 public class Messages {
 
-    public static String PREFIX = "&3&lIncendoPermissions > %s";
+    public static String PREFIX = "&3&lIncendoPermissions > &r";
 
     //
     // Permission related errors

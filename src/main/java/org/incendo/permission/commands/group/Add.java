@@ -59,6 +59,7 @@ public final class Add extends Command {
             caller.message(String.format(Messages.GROUP_NOT_FOUND, groupName));
             return true;
         }
+        // TODO: Add flags
         final Permission permissionObject = Permission.of(permission);
         group.addPermission(permissionObject);
         caller.message(Messages.PERMISSION_ADDED);

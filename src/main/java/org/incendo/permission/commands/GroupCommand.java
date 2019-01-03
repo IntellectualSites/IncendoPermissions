@@ -30,6 +30,7 @@ import com.intellectualsites.commands.CommandInstance;
 import org.incendo.permission.Permissions;
 import org.incendo.permission.commands.group.Add;
 import org.incendo.permission.commands.group.Create;
+import org.incendo.permission.commands.group.Remove;
 import org.jetbrains.annotations.NotNull;
 
 @CommandDeclaration(command = "group", aliases = "g", usage = "/prms group", permission = "incendoperms.use.group")
@@ -41,6 +42,7 @@ public class GroupCommand extends Command {
         this.permissions = permissions;
         this.createCommand(new Create(permissions));
         this.createCommand(new Add(permissions));
+        this.createCommand(new Remove(permissions));
     }
 
     @Override public boolean onCommand(@NotNull final CommandInstance instance) {

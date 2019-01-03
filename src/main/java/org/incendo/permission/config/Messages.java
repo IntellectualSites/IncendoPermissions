@@ -68,6 +68,8 @@ public class Messages {
     //
     // Permission related messages
     //
-    public static String PERMISSION_ADDED = "&aThe permission was successfully added!";
+    public static String PERMISSION_ADDED = "&aThe permission was added successfully!";
+    public static String PERMISSION_REMOVED = "&aThe permission was removed successfully!";
+    public static String PERMISSION_NOT_FOUND = "&4:Error: &cThere is no such registered permission";
 
 }

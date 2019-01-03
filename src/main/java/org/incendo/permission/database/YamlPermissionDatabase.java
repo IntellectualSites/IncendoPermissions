@@ -92,8 +92,14 @@ public final class YamlPermissionDatabase extends PermissionDatabase {
         final Collection<Group> groups = configuration.getStringList("groups").stream()
             .map(this.permissionsInstance::getGroupByName).filter(Optional::isPresent)
             .map(Optional::get).collect(Collectors.toSet());
-        // TODO: Load properties
-        return null;
+        final Map<String, String> properties = new HashMap<>();
+        if (configuration.contains("properties")) {
+            final ConfigurationSection propertySection = configuration.getConfigurationSection("properties");
+            for (final String key : propertySection.getKeys(false)) {
+                properties.put(key, propertySection.getString(key, ""));
+            }
+        }
+        return new PlayerDAO(groups, permissions, properties);
     }
 
     @Override public void savePlayer(@NotNull UUID uuid, @NotNull PlayerDAO playerDAO) {

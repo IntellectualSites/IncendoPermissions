@@ -59,7 +59,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
     void addPlayer(@NotNull final UUID uuid) {
         Preconditions.checkNotNull(uuid, "uuid");
-        final BukkitPlayer player = new BukkitPlayer(uuid);
+        final BukkitPlayer player = new BukkitPlayer(plugin.getPermissions(), uuid);
         player.registerUpdateSubscriber(p -> attachPermissions((BukkitPlayer) p));
         this.playerMap.put(uuid, player);
     }

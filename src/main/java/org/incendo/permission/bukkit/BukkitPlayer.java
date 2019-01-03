@@ -30,6 +30,8 @@ import com.intellectualsites.commands.parser.Parserable;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.incendo.permission.Permissions;
+import org.incendo.permission.config.Messages;
 import org.incendo.permission.player.PermissionPlayer;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -41,8 +43,8 @@ final class BukkitPlayer extends PermissionPlayer {
 
     private Player player; // Lazy loaded
 
-    BukkitPlayer(@NotNull final UUID uuid) {
-        super(uuid);
+    BukkitPlayer(@NotNull final Permissions permissions, @NotNull final UUID uuid) {
+        super(permissions, uuid);
     }
 
     Player getPlayer() {
@@ -53,7 +55,8 @@ final class BukkitPlayer extends PermissionPlayer {
     }
 
     @Override public void message(final String s) {
-        this.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&' , s));
+        this.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&' ,
+            String.format("%s %s", Messages.PREFIX, s)));
     }
 
     @Contract(value = " -> this", pure = true) @Override public PermissionPlayer getSuperCaller() {

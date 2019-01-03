@@ -1,8 +1,12 @@
 ## List of commands
 Arguments: **\<arg\>** is required, **\[arg\]** is optional.
 
+### Base
+- /perms (incendoperms.use)
+- /perms group (incendoperms.use.group)
+
 #### Group Commands
-- /perms group create \<group-name\> \[parent\]
+- /perms group create \<group-name\> \[parent\] (incendoperms.use.group.create)
 - /perms group \<group-name\> add \<permission-node\> \[...filters\]
 - /perms group \<group-name\> remove \<permission-node\>
 - /perms group \<group-name\> tree

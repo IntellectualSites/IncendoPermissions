@@ -38,6 +38,9 @@ an API that will allow you to extend this.
 Groups and players can be assigned properties, such as chat prefixes and suffixes. There will be an
 API that will allow you to extend this.
 
+**Storage:**
+The plugin will allow you to store permissions in either flat files (using YAML) or in a MySQL database.
+
 ### Code Style
 
 If you are planning to commit any changes to the project,

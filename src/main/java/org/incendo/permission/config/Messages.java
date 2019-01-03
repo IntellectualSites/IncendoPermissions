@@ -30,6 +30,8 @@ import com.intellectualsites.configurable.annotations.Configuration;
 @Configuration(name = "messages", implementation = ConfigurationImplementation.YAML)
 public class Messages {
 
+    public static String PREFIX = "&3&lIncendoPermissions > %s";
+
     //
     // Permission related errors
     //
@@ -53,5 +55,13 @@ public class Messages {
     public static String COMMAND_NOT_FOUND = "&4Error: &cThere is no such command";
     public static String COMMAND_WRONG_USAGE = "&4Error: &cWrong usage. Command usage: %s";
     public static String COMMAND_ARGUMENT = "&4Error: &cWrong usage. See argument list";
+
+    //
+    // Group command message
+    //
+    public static String GROUP_ALREADY_EXISTS = "&4Error: &cA group with that name already exists";
+    public static String GROUP_NOT_FOUND = "&4Error: &cThere is not group with the name %s";
+    public static String GROUP_CREATED = "&aThe group was successfully created!";
+    public static String GROUP_NOT_CREATED = "&4Error: &cThe group could not be created";
 
 }

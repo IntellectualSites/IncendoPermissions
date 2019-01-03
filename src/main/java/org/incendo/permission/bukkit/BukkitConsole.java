@@ -29,8 +29,8 @@ import com.intellectualsites.commands.CommandManager;
 import com.intellectualsites.commands.callers.CommandCaller;
 import com.intellectualsites.commands.parser.Parserable;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
+import org.incendo.permission.config.Messages;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,7 +44,7 @@ final class BukkitConsole implements CommandCaller<BukkitConsole> {
     private final ConsoleCommandSender consoleCommandSender = Bukkit.getConsoleSender();
 
     @Override public void message(@NotNull final String s) {
-        this.consoleCommandSender.sendMessage(ChatColor.stripColor(s));
+        this.consoleCommandSender.sendMessage(String.format("%s %s", Messages.PREFIX, s));
     }
 
     @Contract(value = " -> this", pure = true) @Override public BukkitConsole getSuperCaller() {

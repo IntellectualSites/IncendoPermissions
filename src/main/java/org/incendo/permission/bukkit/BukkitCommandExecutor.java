@@ -49,7 +49,7 @@ final class BukkitCommandExecutor implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull final CommandSender sender, @NotNull final Command command,
-        @NotNull final String label, @NotNull final String[] args) {
+        @NotNull final String label, @NotNull String[] args) {
         Preconditions.checkNotNull(sender, "sender");
 
         final CommandCaller caller;
@@ -65,7 +65,12 @@ final class BukkitCommandExecutor implements CommandExecutor {
             stringBuilder.append(" ").append(arg);
         }
 
-        final CommandResult result = permissionCommand.handle(caller, stringBuilder.toString());
+        if (args.length == 0) {
+            args = new String[] { "help" }; // force help command
+        }
+
+        final CommandResult result = permissionCommand.getCommandManager().
+            handle(caller, stringBuilder.toString());
         switch (result.getCommandResult()) {
             case NOT_PERMITTED: {
                 caller.message(Messages.NOT_PERMITTED);

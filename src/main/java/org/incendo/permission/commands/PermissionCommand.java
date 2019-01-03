@@ -24,28 +24,28 @@
 
 package org.incendo.permission.commands;
 
-import com.intellectualsites.commands.Command;
-import com.intellectualsites.commands.CommandDeclaration;
-import lombok.RequiredArgsConstructor;
+import com.intellectualsites.commands.CommandManager;
+import lombok.Getter;
 import org.incendo.permission.Permissions;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Main command handler
  */
-@CommandDeclaration(command = "permissions", permission = "incendoperms.use", usage = "/permissions")
-@RequiredArgsConstructor
-public final class PermissionCommand extends Command {
+public final class PermissionCommand {
 
     private final Permissions permissions;
+    @Getter private final CommandManager commandManager;
 
-    {
-        getManagerOptions().setPrintStacktrace(false);
-        getManagerOptions().setUseAdvancedPermissions(false);
-        getManagerOptions().setRequirePrefix(false);
-        getManagerOptions().setUsageFormat("");
-        // Add this as the base command
-        this.createCommand(this);
+    public PermissionCommand(@NotNull final Permissions permissions) {
+        this.permissions = permissions;
+        this.commandManager = new CommandManager();
+        this.commandManager.getManagerOptions().setPrintStacktrace(false);
+        this.commandManager.getManagerOptions().setUseAdvancedPermissions(false);
+        this.commandManager.getManagerOptions().setRequirePrefix(false);
+        this.commandManager.getManagerOptions().setUsageFormat("");
         // Add sub-commands
+        this.commandManager.createCommand(new GroupCommand(permissions));
     }
 
 }

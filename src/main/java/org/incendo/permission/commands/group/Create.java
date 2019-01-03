@@ -15,7 +15,8 @@ import java.util.Locale;
 /**
  * /perms group create
  */
-@CommandDeclaration(command = "create", aliases = "c", usage = "/perms group create <name> [parent]", permission = "incendoperms.use.group.create")
+@CommandDeclaration(command = "create", aliases = "c", usage = "/perms group create <name> [parent]",
+    permission = "incendoperms.use.group.create", description = "Create a new group")
 public final class Create extends Command {
 
     private final Permissions permissions;

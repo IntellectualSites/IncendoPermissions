@@ -69,7 +69,7 @@ import java.util.concurrent.ConcurrentHashMap;
         return this.playerMap.containsKey(uuid);
     }
 
-    private void removeInternally(@NotNull final Player player) {
+    void removeInternally(@NotNull final Player player) {
         this.removePlayer(player.getUniqueId());
     }
 

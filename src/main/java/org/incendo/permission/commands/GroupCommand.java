@@ -4,6 +4,7 @@ import com.intellectualsites.commands.Command;
 import com.intellectualsites.commands.CommandDeclaration;
 import com.intellectualsites.commands.CommandInstance;
 import org.incendo.permission.Permissions;
+import org.incendo.permission.commands.group.Add;
 import org.incendo.permission.commands.group.Create;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,6 +13,7 @@ public class GroupCommand extends Command {
 
     public GroupCommand(@NotNull final Permissions permissions) {
         this.createCommand(new Create(permissions));
+        this.createCommand(new Add(permissions));
     }
 
     @Override public boolean onCommand(@NotNull final CommandInstance instance) {

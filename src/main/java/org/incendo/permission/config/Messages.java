@@ -57,11 +57,17 @@ public class Messages {
     public static String COMMAND_ARGUMENT = "&4Error: &cWrong usage. See argument list";
 
     //
-    // Group command message
+    // Group command messages
     //
     public static String GROUP_ALREADY_EXISTS = "&4Error: &cA group with that name already exists";
     public static String GROUP_NOT_FOUND = "&4Error: &cThere is not group with the name %s";
     public static String GROUP_CREATED = "&aThe group was successfully created!";
     public static String GROUP_NOT_CREATED = "&4Error: &cThe group could not be created";
+
+
+    //
+    // Permission related messages
+    //
+    public static String PERMISSION_ADDED = "&aThe permission was successfully added!";
 
 }

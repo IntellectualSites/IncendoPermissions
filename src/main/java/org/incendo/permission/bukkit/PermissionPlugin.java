@@ -52,13 +52,12 @@ public final class PermissionPlugin extends JavaPlugin {
         // Register listeners
         //
         this.getServer().getPluginManager().registerEvents(playerRegistry, this);
-        // TODO: Load permissions
-
         // Load permissions for players that are online right now, in case of reload (ew)
         Bukkit.getOnlinePlayers().stream().map(Player::getUniqueId).forEach(playerRegistry::addPlayer);
     }
 
     @Override public void onDisable() {
-        // TODO: Save permissions and unload all players -> we are reloadable!
+        Bukkit.getOnlinePlayers().forEach(this.playerRegistry::removeInternally);
+        this.permissions.getDatabase().saveGroups(this.permissions.getGroups());
     }
 }

@@ -40,6 +40,13 @@ public final class PermissionPlugin extends JavaPlugin {
     @Getter private Permissions permissions;
 
     @Override public void onEnable() {
+        if (!this.getDataFolder().exists()) {
+            if (!this.getDataFolder().mkdir()) {
+                this.getLogger().severe("Failed to create plugin folder. Please create /plugins/"
+                    + getName() + " manually");
+            }
+        }
+
         this.permissions = new Permissions(this.getDataFolder());
         this.playerRegistry = new BukkitPlayerRegistry(this);
         //

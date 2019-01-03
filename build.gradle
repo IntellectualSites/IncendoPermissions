@@ -38,22 +38,25 @@ repositories {
 }
 
 dependencies {
-    compile 'org.bukkit:craftbukkit:1.13.2-R0.1-SNAPSHOT'
+    compileOnly 'org.bukkit:craftbukkit:1.13.2-R0.1-SNAPSHOT'
     compileOnly 'org.projectlombok:lombok:1.18.4'
-
     compile 'com.github.Sauilitired:Configurable:aa2e6af5d2'
     compile 'com.github.Sauilitired:CommandAPI:d4763787d7'
-
     compile group: 'com.google.guava', name: 'guava', version: '27.0.1-jre'
-
     compile group: 'org.jetbrains', name: 'annotations', version: '16.0.3'
-
-    testCompile group: 'junit', name: 'junit', version: '4.12'
 }
+
+jar.enabled = false
 
 shadowJar {
-    dependencies {
+    /*dependencies {
         include('com.github.Sauilitired:Configurable:aa2e6af5d2')
         include('com.github.Sauilitired:CommandAPI:d4763787d7')
+    }*/
+    dependencies {
+        exclude('org.bukkit:craftbukkit:1.13.2-R0.1-SNAPSHOT')
     }
 }
+
+build.dependsOn(licenseFormatMain)
+build.dependsOn(shadowJar)

@@ -49,11 +49,19 @@ public final class Permissions {
 
     public Permissions(@NotNull final File folder) {
         Preconditions.checkNotNull(folder, "folder");
-        this.mainCommand = new PermissionCommand(this);
         this.folder = folder;
+
+        final File configFolder = new File(this.folder, "config");
+        if (!configFolder.exists()) {
+            if (!configFolder.mkdir()) {
+                throw new IllegalStateException("Failed to create configuration directory");
+            }
+        }
+
+        this.mainCommand = new PermissionCommand(this);
         // Load configurations
-        ConfigurationFactory.load(Messages.class, new File(getFolder(), "config")).get();
-        ConfigurationFactory.load(PermissionConfig.class, new File(getFolder(), "config")).get();
+        ConfigurationFactory.load(Messages.class, configFolder).get();
+        ConfigurationFactory.load(PermissionConfig.class, configFolder).get();
         // Create/load database
         switch (PermissionConfig.databaseType.toLowerCase(Locale.ENGLISH)) {
             case "yaml": {

@@ -46,7 +46,7 @@ public final class Group {
     private final Group parent;
     private final Collection<Consumer<Group>> updateSubscribers = Lists.newArrayList();
 
-    private final Collection<Permission> permissions = new ArrayList(); // initial permissions
+    private final Collection<Permission> permissions = new ArrayList<>(); // initial permissions
     private final Collection<Permission> effectivePermissions = new HashSet<>();
     private final Map<String, String> properties = new HashMap<>();
 
@@ -68,6 +68,16 @@ public final class Group {
             }
         }
         return false;
+    }
+
+    public void setPermissions(@NotNull final Collection<Permission> permissions) {
+        Preconditions.checkNotNull(permissions, "permissions");
+        this.permissions.addAll(permissions);
+    }
+
+    public void setProperties(@NotNull final Map<String, String> properties) {
+        Preconditions.checkNotNull(properties, "properties");
+        this.properties.putAll(properties);
     }
 
     @Nullable public String getProperty(@NotNull final String key) {

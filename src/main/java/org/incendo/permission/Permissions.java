@@ -24,13 +24,18 @@
 
 package org.incendo.permission;
 
+import com.google.common.base.Preconditions;
 import com.intellectualsites.configurable.ConfigurationFactory;
 import lombok.Getter;
 import org.incendo.permission.commands.PermissionCommand;
 import org.incendo.permission.config.Messages;
+import org.incendo.permission.config.PermissionConfig;
+import org.incendo.permission.database.PermissionDatabase;
+import org.incendo.permission.database.YamlPermissionDatabase;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.util.*;
 
 /**
  * Permissions main file. Get an instance of this via your implementations plugin file
@@ -39,12 +44,55 @@ public final class Permissions {
 
     @Getter private final PermissionCommand mainCommand;
     @Getter private final File folder;
+    @Getter private final PermissionDatabase database;
+    private final Collection<Group> groups = new HashSet<>();
 
     public Permissions(@NotNull final File folder) {
+        Preconditions.checkNotNull(folder, "folder");
         this.mainCommand = new PermissionCommand(this);
         this.folder = folder;
         // Load configurations
         ConfigurationFactory.load(Messages.class, new File(getFolder(), "config")).get();
+        ConfigurationFactory.load(PermissionConfig.class, new File(getFolder(), "config")).get();
+        // Create/load database
+        switch (PermissionConfig.databaseType.toLowerCase(Locale.ENGLISH)) {
+            case "yaml": {
+                this.database = new YamlPermissionDatabase(this, folder);
+            } break;
+            default: {
+                throw new IllegalArgumentException(String.format("Unknown database type: %s",
+                    PermissionConfig.databaseType));
+            }
+        }
+        // Load groups from database
+        this.database.loadGroups();
+        // check if the default group is loaded, otherwise insert it
+        if (!getGroupByName("default").isPresent()) {
+            final Group defaultGroup = new Group("default", null);
+            this.groups.add(defaultGroup);
+        }
+    }
+
+    @NotNull public Optional<Group> getGroupByName(@NotNull final String name) {
+        Preconditions.checkNotNull(name, "name");
+        for (final Group group : this.groups) {
+            if (group.getName().equalsIgnoreCase(name)) {
+                return Optional.of(group);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public boolean registerGroup(@NotNull final Group group) {
+        Preconditions.checkNotNull(group, "group");
+        if (getGroupByName(group.getName()).isPresent()) {
+            return false;
+        }
+        return this.groups.add(group);
+    }
+
+    @NotNull public Collection<Group> getGroups() {
+        return Collections.unmodifiableCollection(this.groups);
     }
 
 }

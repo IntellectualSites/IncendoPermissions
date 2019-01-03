@@ -25,6 +25,7 @@
 package org.incendo.permission;
 
 import com.google.common.base.Preconditions;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Contract;
@@ -32,7 +33,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
-@RequiredArgsConstructor
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Permission {
 
     private final String name;

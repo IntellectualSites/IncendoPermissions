@@ -32,6 +32,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.incendo.permission.Group;
 import org.incendo.permission.Permission;
+import org.incendo.permission.Permissions;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,24 +43,35 @@ import java.util.function.Consumer;
 @RequiredArgsConstructor
 public abstract class PermissionPlayer implements CommandCaller<PermissionPlayer> {
 
+    @Getter private final Permissions permissionsInstance;
     @Getter private final UUID uuid;
+
     private final Collection<Group> groups = new HashSet<>();
     private final Collection<Permission> permissions = new HashSet<>(); // player specific permissions
     private final Collection<Permission> effectivePermissions = new HashSet<>();
     private final Collection<Consumer<PermissionPlayer>> updateSubscribers = Lists.newArrayList();
     private final Map<String, String> properties = new HashMap<>();
 
-    public boolean hasWorldDependent, hasGameModeDependent;
+    private boolean hasWorldDependent = false;
+    private boolean hasGameModeDependent = false;
 
     protected final void setup() {
         // Load groups
+        boolean hasDefault = false;
         for (final Group group : groups) {
             group.registerUpdateSubscriber(g -> this.updateEffectivePermissions());
+            if (group.getName().equalsIgnoreCase("default")) {
+                hasDefault = true;
+            }
+        }
+        if (!hasDefault) {
+            // insert default group if it isn't already registered
+            this.groups.add(permissionsInstance.getGroupByName("default").orElse(null));
         }
         this.updateEffectivePermissions();
     }
 
-    public final boolean hasWorldDependent() {
+    @Contract(pure = true) public final boolean hasWorldDependent() {
         return false; // TODO: Implement this
     }
 
@@ -66,7 +79,7 @@ public abstract class PermissionPlayer implements CommandCaller<PermissionPlayer
         return false; // TODO: Implement this
     }
 
-    @NotNull public final Collection<Permission> getEffectivePermissions() {
+    @Contract(pure = true) @NotNull public final Collection<Permission> getEffectivePermissions() {
         return Collections.unmodifiableCollection(effectivePermissions);
     }
 
@@ -112,6 +125,26 @@ public abstract class PermissionPlayer implements CommandCaller<PermissionPlayer
         this.updateSubscribers.add(subscriber);
     }
 
+    public void addGroup(@NotNull final Group group) {
+        Preconditions.checkNotNull(group);
+        if (this.groups.contains(group)) {
+            throw new IllegalArgumentException(String.format("The player is already a member of"
+                + " the group \"%s\"", group.getName()));
+        }
+        this.groups.add(group);
+        this.updateEffectivePermissions();
+    }
+
+    public void removeGroup(@NotNull final Group group) {
+        Preconditions.checkNotNull(group);
+        if (!this.groups.contains(group)) {
+            throw new IllegalArgumentException(String.format("The player is not a member of the"
+                + " group \"%s\"", group.getName()));
+        }
+        this.groups.remove(group);
+        this.updateEffectivePermissions();
+    }
+
     public void addPermission(@NotNull final Permission permission) {
         Preconditions.checkNotNull(permission);
         this.removePermission(permission); // make sure to remove any one similar permission before
@@ -131,7 +164,7 @@ public abstract class PermissionPlayer implements CommandCaller<PermissionPlayer
      * Performs a greedy search for effectively positive permissions across the players
      * personal permissions, and their group permissions
      */
-    protected final void updateEffectivePermissions() {
+    private final void updateEffectivePermissions() {
         final Map<String, Permission> effectivePermissions = Maps.newHashMap();
         for (final Group group : groups) {
             for (final Permission permission : group.getEffectivePermissions()) {

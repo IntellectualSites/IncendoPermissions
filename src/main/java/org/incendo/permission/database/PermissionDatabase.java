@@ -9,7 +9,10 @@ import java.util.UUID;
 
 public abstract class PermissionDatabase {
 
-    public abstract Collection<Group> getGroups();
+    public abstract void loadGroups();
+    public abstract void saveGroups(@NotNull final Collection<Group> groups);
+
     public abstract PlayerDAO getPlayer(@NotNull final UUID uuid);
+    public abstract void savePlayer(@NotNull final UUID uuid, @NotNull final PlayerDAO playerDAO);
 
 }

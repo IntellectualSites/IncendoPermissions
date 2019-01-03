@@ -160,6 +160,24 @@ public abstract class PermissionPlayer implements CommandCaller<PermissionPlayer
         });
     }
 
+    public boolean hasPermission(@NotNull final String permission) {
+        for (final Permission effectivePermission : this.effectivePermissions) {
+            if (effectivePermission.matches(permission)) {
+                return effectivePermission.getValue();
+            }
+        }
+        return false;
+    }
+
+    public boolean hasPermissionSet(@NotNull final String permission) {
+        for (final Permission effectivePermission : this.effectivePermissions) {
+            if (effectivePermission.matches(permission)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Performs a greedy search for effectively positive permissions across the players
      * personal permissions, and their group permissions

@@ -28,17 +28,19 @@ import com.google.common.base.Preconditions;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_13_R2.entity.CraftHumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
+import org.bukkit.permissions.PermissibleBase;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
-import org.incendo.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +53,15 @@ import java.util.concurrent.ConcurrentHashMap;
  * {@link org.incendo.permission.player.PermissionPlayer Permission players}
  */
 @RequiredArgsConstructor final class BukkitPlayerRegistry implements Listener {
+
+    private static Field FIELD_PERM;
+    static {
+        try {
+            FIELD_PERM = CraftHumanEntity.class.getDeclaredField("perm");
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+    }
 
     private final Map<UUID, BukkitPlayer> playerMap = new ConcurrentHashMap<>();
     @Getter private final BukkitConsole console = new BukkitConsole();
@@ -78,11 +89,11 @@ import java.util.concurrent.ConcurrentHashMap;
         // first make sure to remove all pre-existing attachments
         this.removeInternally(player.getPlayer());
         // then we add the new ones
-        for (final Permission permission : player.getEffectivePermissions()) {
+        /*for (final Permission permission : player.getEffectivePermissions()) {
             // TODO: Add support for timed permissions
             player.getPlayer()
                 .addAttachment(plugin, permission.getRawName(), permission.getValue());
-        }
+        }*/
     }
 
     private void removeAttachments(@Nullable final Player player) {
@@ -170,7 +181,21 @@ import java.util.concurrent.ConcurrentHashMap;
         @NotNull final PlayerLoginEvent event) {
         while (event.getPlayer().isOnline() && !this
             .isLoaded(event.getPlayer().getUniqueId())) { // block until it is loaded
-            this.attachPermissions(getPlayer(event.getPlayer()));
+            final BukkitPlayer bukkitPlayer = getPlayer(event.getPlayer());
+            final CraftHumanEntity craftHumanEntity = (CraftHumanEntity) event.getPlayer();
+            try {
+                FIELD_PERM.setAccessible(true);
+                final PermissibleBase oldBase = (PermissibleBase) FIELD_PERM.get(craftHumanEntity);
+                final PermissibleBase customBase = new CustomPermissibleBase(this.plugin, bukkitPlayer,
+                    event.getPlayer(), oldBase);
+                FIELD_PERM.set(craftHumanEntity, customBase);
+                plugin.getLogger().info(String.format("Injected custom PermissibleBase into player %s",
+                    event.getPlayer().getName()));
+            } catch (final Throwable e) {
+                plugin.getLogger().severe(String.format("Failed to replace PermissibleBase: %s",
+                    e.getMessage()));
+            }
+            this.attachPermissions(bukkitPlayer);
         }
     }
 
